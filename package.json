@@ -1,0 +1,14 @@
+{
+  "name": "plantmind-ai",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently -n web,api -c cyan,green \"npm run dev -w @plantmind/web\" \"npm run dev -w @plantmind/api\"",
+    "build": "npm run build -w @plantmind/api && npm run build -w @plantmind/web",
+    "test": "npm run test -w @plantmind/api",
+    "evaluate": "npm run evaluate -w @plantmind/api"
+  },
+  "devDependencies": {
+    "concurrently": "latest"
+  }
+}
