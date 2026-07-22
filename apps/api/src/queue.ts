@@ -18,7 +18,6 @@ export async function enqueueDocument(id: string) {
 export function startDocumentWorker() {
   if (workerTimer) return;
   workerTimer = setInterval(() => void drainOnce(), 750);
-  workerTimer.unref();
 }
 
 async function drainOnce() {

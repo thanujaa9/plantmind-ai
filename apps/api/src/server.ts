@@ -49,7 +49,9 @@ app.post("/api/documents", (req, res) => {
     const bytes = Buffer.from(parsed.data.data, "base64");
     if (bytes.length > 12 * 1024 * 1024) return res.status(413).json({ error: "Files must be smaller than 12 MB." });
     const document = createPendingDocument({ ...parsed.data, bytes });
-    void enqueueDocument(document.id);
+    void enqueueDocument(document.id).catch((queueError) => {
+      console.error(`Failed to enqueue document ${document.id}:`, queueError);
+    });
     return res.status(202).json(document);
   } catch (error) {
     return res.status(422).json({ error: error instanceof Error ? error.message : "Document processing failed." });
@@ -89,7 +91,7 @@ function selectCorpus(stored: ReturnType<typeof getStoredChunks>) {
 
 function deriveAssets() {
   const chunks = getStoredChunks();
-  const ids = [...new Set(chunks.map((item) => item.assetId).filter(Boolean))].sort();
+  const ids = [...new Set(chunks.map((item) => item.assetId).filter((id) => /^[A-Z]{1,4}-\d{3,5}$/.test(id)))].sort();
   const referenceIds = ids.filter((id) => chunks.some((item) => item.assetId === id && /incident/i.test(item.document)));
   return ids.map((id) => {
     const related = chunks.filter((item) => item.assetId === id);
@@ -159,5 +161,6 @@ function auditAnswer(question: string, answer: Awaited<ReturnType<typeof generat
 const port = Number(process.env.PORT || 4000);
 if (process.env.NODE_ENV !== "test") {
   startDocumentWorker();
-  app.listen(port, () => console.log(`PlantMind API listening on ${port}`));
+  const server = app.listen(port, () => console.log(`PlantMind API listening on ${port}`));
+  server.ref();
 }

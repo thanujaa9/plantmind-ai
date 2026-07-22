@@ -77,7 +77,7 @@ export function indexDocument(id: string, pages: string[]) {
   let chunkCount = 0;
   pages.forEach((pageText, pageIndex) => {
     chunkText(pageText).forEach((content) => {
-      const assetId = content.match(/\b[A-Z]{1,4}-\d{2,5}\b/)?.[0] || "";
+      const assetId = content.match(/\b[A-Z]{1,4}-\d{3,5}\b/)?.[0] || "";
       insert.run(randomUUID(), id, pageIndex + 1, content, assetId);
       chunkCount += 1;
     });
